@@ -5,17 +5,21 @@ import (
 	"gorm.io/gorm"
 )
 
-func RegisterRoutes(r *gin.RouterGroup, db *gorm.DB) {
+func RegisterRoutes(public *gin.RouterGroup, protected *gin.RouterGroup, db *gorm.DB) {
 	repo := NewRepository(db)
 	service := NewService(repo)
 	handler := NewHandler(service)
 
-	category := r.Group("/categories")
+	publicCategories := public.Group("/products")
 	{
-		category.POST("", handler.CreateCategory)
-		category.GET("", handler.GetAll)
-		category.GET("/:id", handler.GetByID)
-		category.PUT("/:id", handler.Update)
-		category.DELETE("/:id", handler.Delete)
+		publicCategories.GET("", handler.GetAll)
+		publicCategories.GET("/:id", handler.GetByID)
+	}
+
+	protectedCategories := protected.Group("/products")
+	{
+		protectedCategories.POST("", handler.CreateCategory)
+		protectedCategories.PUT("/:id", handler.Update)
+		protectedCategories.DELETE("/:id", handler.Delete)
 	}
 }

@@ -25,7 +25,7 @@ func NewHandler(service *Service) *Handler {
 // @Success      201    {object}  Category
 // @Failure      400    {object}  map[string]string
 // @Failure      500    {object}  map[string]string
-// @Router       /api/categories [post]
+// @Router       /categories [post]
 func (h *Handler) CreateCategory(c *gin.Context) {
 	var req CreateCategoryRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -47,7 +47,7 @@ func (h *Handler) CreateCategory(c *gin.Context) {
 // @Produce      json
 // @Success      200  {array}   Category
 // @Failure      500  {object}  map[string]string
-// @Router       /api/categories [get]
+// @Router       /categories [get]
 func (h *Handler) GetAll(c *gin.Context) {
 	results, err := h.service.GetAll()
 	if err != nil {
@@ -66,7 +66,7 @@ func (h *Handler) GetAll(c *gin.Context) {
 // @Success      200  {object}  Category
 // @Failure      400  {object}  map[string]string
 // @Failure      404  {object}  map[string]string
-// @Router       /api/categories/{id} [get]
+// @Router       /categories/{id} [get]
 func (h *Handler) GetByID(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
@@ -92,7 +92,7 @@ func (h *Handler) GetByID(c *gin.Context) {
 // @Success      200    {object}  Category
 // @Failure      400    {object}  map[string]string
 // @Failure      500    {object}  map[string]string
-// @Router       /api/categories/{id} [put]
+// @Router       /categories/{id} [put]
 func (h *Handler) Update(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
@@ -121,7 +121,7 @@ func (h *Handler) Update(c *gin.Context) {
 // @Success      204  "No Content"
 // @Failure      400  {object}  map[string]string
 // @Failure      500  {object}  map[string]string
-// @Router       /api/categories/{id} [delete]
+// @Router       /categories/{id} [delete]
 func (h *Handler) Delete(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {

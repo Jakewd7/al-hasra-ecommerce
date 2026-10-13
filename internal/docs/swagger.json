@@ -1,15 +1,15 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "API untuk CRUD Plants",
-        "title": "Backend ESTO API",
+        "description": "API backend layanan e-commerce Sekolah Al-Hasra.",
+        "title": "E-Commerce Al-Hasra API",
         "contact": {},
         "version": "1.0"
     },
     "host": "localhost:8000",
     "basePath": "/api",
     "paths": {
-        "/api/categories": {
+        "/categories": {
             "get": {
                 "description": "Get list of all product categories",
                 "produces": [
@@ -91,7 +91,7 @@
                 }
             }
         },
-        "/api/categories/{id}": {
+        "/categories/{id}": {
             "get": {
                 "description": "Get details of a single category by its UUID",
                 "produces": [

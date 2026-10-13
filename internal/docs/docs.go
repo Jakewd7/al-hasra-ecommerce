@@ -15,7 +15,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/categories": {
+        "/categories": {
             "get": {
                 "description": "Get list of all product categories",
                 "produces": [
@@ -97,7 +97,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/categories/{id}": {
+        "/categories/{id}": {
             "get": {
                 "description": "Get details of a single category by its UUID",
                 "produces": [
@@ -870,8 +870,8 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "localhost:8000",
 	BasePath:         "/api",
 	Schemes:          []string{},
-	Title:            "Backend ESTO API",
-	Description:      "API untuk CRUD Plants",
+	Title:            "E-Commerce Al-Hasra API",
+	Description:      "API backend layanan e-commerce Sekolah Al-Hasra.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

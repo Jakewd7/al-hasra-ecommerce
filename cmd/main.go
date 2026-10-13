@@ -1,6 +1,6 @@
-// @title Backend ESTO API
+// @title E-Commerce Al-Hasra API
 // @version 1.0
-// @description API untuk CRUD Plants
+// @description API backend layanan e-commerce Sekolah Al-Hasra.
 // @host localhost:8000
 // @BasePath /api
 
