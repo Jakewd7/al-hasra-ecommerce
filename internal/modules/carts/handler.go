@@ -2,71 +2,77 @@ package carts
 
 import (
 	"net/http"
+
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 type Handler struct {
-	service *Service
+	service Service
 }
 
-func NewHandler(service *Service) *Handler {
+func NewHandler(service Service) *Handler {
 	return &Handler{service}
 }
 
-func (h *Handler) CreateCart(c *gin.Context) {
-	var req CreateCartRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
+// AddToCart godoc
+// @Summary Add product to cart
+// @Description Add product item to cart (guest mode or authenticated)
+// @Tags Carts
+// @Accept json
+// @Produce json
+// @Param request body AddToCartRequest true "Add To Cart Request"
+// @Success 201 {object} CartResponse
+// @Failure 400 {object} map[string]string
+// @Router /carts [post]
+func (h *Handler) AddToCart(c *gin.Context) {
+	var input AddToCartRequest
+	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	result, err := h.service.Create(req)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	c.JSON(http.StatusCreated, result)
-}
 
-func (h *Handler) GetAll(c *gin.Context) {
-	results, err := h.service.GetAll()
+	cart, err := h.service.AddToCart(input)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, results)
-}
-
-func (h *Handler) GetByID(c *gin.Context) {
-	id, _ := uuid.Parse(c.Param("id"))
-	result, err := h.service.GetByID(id)
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Not found"})
-		return
-	}
-	c.JSON(http.StatusOK, result)
-}
-
-func (h *Handler) Update(c *gin.Context) {
-	id, _ := uuid.Parse(c.Param("id"))
-	var req UpdateCartRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	result, err := h.service.Update(id, req)
+	c.JSON(http.StatusCreated, cart)
+}
+
+// GetCarts godoc
+// @Summary Get all carts
+// @Description Get list of cart items
+// @Tags Carts
+// @Produce json
+// @Success 200 {array} CartResponse
+// @Router /carts [get]
+func (h *Handler) GetCarts(c *gin.Context) {
+	carts, err := h.service.GetAllCarts()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, result)
+	c.JSON(http.StatusOK, carts)
 }
 
-func (h *Handler) Delete(c *gin.Context) {
-	id, _ := uuid.Parse(c.Param("id"))
-	if err := h.service.Delete(id); err != nil {
+// DeleteCart godoc
+// @Summary Delete cart item
+// @Description Delete cart item by ID
+// @Tags Carts
+// @Param id path string true "Cart ID"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Router /carts/{id} [delete]
+func (h *Handler) DeleteCart(c *gin.Context) {
+	id := c.Param("id")
+	if id == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID parameter is required"})
+		return
+	}
+
+	if err := h.service.DeleteCart(id); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusNoContent, nil)
+	c.JSON(http.StatusOK, gin.H{"message": "Cart item deleted successfully"})
 }

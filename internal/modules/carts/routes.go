@@ -10,12 +10,10 @@ func RegisterRoutes(r *gin.RouterGroup, db *gorm.DB) {
 	service := NewService(repo)
 	handler := NewHandler(service)
 
-	cart := r.Group("/carts")
+	cartRoutes := r.Group("/carts")
 	{
-		cart.POST("", handler.CreateCart)
-		cart.GET("", handler.GetAll)
-		cart.GET("/:id", handler.GetByID)
-		cart.PUT("/:id", handler.Update)
-		cart.DELETE("/:id", handler.Delete)
+		cartRoutes.POST("", handler.AddToCart)
+		cartRoutes.GET("", handler.GetCarts)
+		cartRoutes.DELETE("/:id", handler.DeleteCart)
 	}
 }

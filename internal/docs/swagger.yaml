@@ -1,5 +1,35 @@
 basePath: /api
 definitions:
+  carts.AddToCartRequest:
+    properties:
+      product_id:
+        type: string
+      quantity:
+        example: 1
+        type: integer
+      user_id:
+        type: string
+    required:
+    - product_id
+    - quantity
+    type: object
+  carts.CartResponse:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      product:
+        $ref: '#/definitions/products.ProductResponse'
+      product_id:
+        type: string
+      quantity:
+        type: integer
+      updated_at:
+        type: string
+      user_id:
+        type: string
+    type: object
   categories.Category:
     properties:
       created_at:
@@ -29,6 +59,149 @@ definitions:
         type: string
       slug:
         type: string
+    type: object
+  orders.CheckoutItemRequest:
+    properties:
+      product_id:
+        type: string
+      quantity:
+        type: integer
+    required:
+    - product_id
+    - quantity
+    type: object
+  orders.CheckoutRequest:
+    properties:
+      customer_name:
+        example: John Doe
+        type: string
+      customer_phone:
+        example: "08123456789"
+        type: string
+      items:
+        items:
+          $ref: '#/definitions/orders.CheckoutItemRequest'
+        type: array
+      shipping_address:
+        example: Jl. Raya Ciputat No. 12
+        type: string
+      user_id:
+        type: string
+    required:
+    - customer_name
+    - customer_phone
+    - items
+    - shipping_address
+    type: object
+  orders.OrderItemResponse:
+    properties:
+      id:
+        type: string
+      price:
+        type: number
+      product:
+        $ref: '#/definitions/products.ProductResponse'
+      product_id:
+        type: string
+      quantity:
+        type: integer
+      subtotal:
+        type: number
+    type: object
+  orders.OrderResponse:
+    properties:
+      created_at:
+        type: string
+      customer_name:
+        type: string
+      customer_phone:
+        type: string
+      id:
+        type: string
+      order_items:
+        items:
+          $ref: '#/definitions/orders.OrderItemResponse'
+        type: array
+      order_number:
+        type: string
+      shipping_address:
+        type: string
+      status:
+        type: string
+      total_amount:
+        type: number
+      updated_at:
+        type: string
+      user_id:
+        type: string
+    type: object
+  products.CreateProductRequest:
+    properties:
+      category_id:
+        type: string
+      description:
+        example: Sepatu olahraga nyaman dipakai
+        type: string
+      image_url:
+        example: https://example.com/image.jpg
+        type: string
+      name:
+        example: Sepatu Olahraga
+        type: string
+      price:
+        example: 150000
+        type: number
+      stock:
+        example: 10
+        minimum: 0
+        type: integer
+    required:
+    - category_id
+    - name
+    - price
+    - stock
+    type: object
+  products.ProductResponse:
+    properties:
+      category_id:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      image_url:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        type: string
+      price:
+        type: number
+      slug:
+        type: string
+      stock:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  products.UpdateProductRequest:
+    properties:
+      category_id:
+        type: string
+      description:
+        type: string
+      image_url:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        type: string
+      price:
+        type: number
+      stock:
+        type: integer
     type: object
   roles.CreateRoleRequest:
     properties:
@@ -154,6 +327,73 @@ info:
   title: E-Commerce Al-Hasra API
   version: "1.0"
 paths:
+  /carts:
+    get:
+      description: Get list of cart items
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/carts.CartResponse'
+            type: array
+      summary: Get all carts
+      tags:
+      - Carts
+    post:
+      consumes:
+      - application/json
+      description: Add product item to cart (guest mode or authenticated)
+      parameters:
+      - description: Add To Cart Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/carts.AddToCartRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/carts.CartResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Add product to cart
+      tags:
+      - Carts
+  /carts/{id}:
+    delete:
+      description: Delete cart item by ID
+      parameters:
+      - description: Cart ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete cart item
+      tags:
+      - Carts
   /categories:
     get:
       description: Get list of all product categories
@@ -305,6 +545,74 @@ paths:
       summary: Update a category
       tags:
       - categories
+  /orders:
+    get:
+      description: Get list of all submitted orders
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/orders.OrderResponse'
+            type: array
+      summary: Get all orders
+      tags:
+      - Orders
+  /orders/{id}:
+    get:
+      description: Get order details by ID
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/orders.OrderResponse'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get order by ID
+      tags:
+      - Orders
+  /orders/checkout:
+    post:
+      consumes:
+      - application/json
+      description: Process checkout without requiring user authentication (Guest Checkout)
+      parameters:
+      - description: Checkout Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/orders.CheckoutRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/orders.OrderResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Process order checkout
+      tags:
+      - Orders
   /permissions:
     get:
       description: Get list of all available permissions
@@ -320,6 +628,129 @@ paths:
       summary: Get all permissions
       tags:
       - Roles
+  /products:
+    get:
+      description: Get list of all active products
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/products.ProductResponse'
+            type: array
+      summary: Get all products
+      tags:
+      - Products
+    post:
+      consumes:
+      - application/json
+      description: Create a new product
+      parameters:
+      - description: Create Product Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/products.CreateProductRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/products.ProductResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create new product
+      tags:
+      - Products
+  /products/{id}:
+    delete:
+      description: Soft delete product by ID
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete product
+      tags:
+      - Products
+    get:
+      description: Get product details by ID
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/products.ProductResponse'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get product by ID
+      tags:
+      - Products
+    put:
+      consumes:
+      - application/json
+      description: Update product details
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update Product Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/products.UpdateProductRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/products.ProductResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update product
+      tags:
+      - Products
   /roles:
     get:
       description: Get list of roles including their permissions

@@ -8,6 +8,7 @@ import (
 	"gorm.io/gorm"
 
 	// [AUTO-IMPORT]
+	"github.com/jakewd7/internal/modules/orders"
 	"github.com/jakewd7/internal/modules/carts"
 	"github.com/jakewd7/internal/modules/categories"
 	"github.com/jakewd7/internal/modules/products"
@@ -24,6 +25,7 @@ func RegisterRoutes(publicGroup *gin.RouterGroup, db *gorm.DB) {
 	roles.RegisterRoutes(protectedGroup, db)
 
 	// [AUTO-REGISTER]
+	orders.RegisterRoutes(protectedGroup, db)
 	carts.RegisterRoutes(protectedGroup, db)
 	products.RegisterRoutes(protectedGroup, publicGroup, db)
 	categories.RegisterRoutes(protectedGroup, publicGroup, db)
