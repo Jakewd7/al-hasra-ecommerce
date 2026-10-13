@@ -1,70 +1,33 @@
 basePath: /api
 definitions:
-  branches.BranchResponse:
+  categories.Category:
     properties:
-      address:
-        type: string
-      branch_code:
-        type: string
-      branch_location:
-        type: string
-      branch_name:
-        type: string
-      email:
+      created_at:
         type: string
       id:
         type: string
-      is_active:
-        type: boolean
-      phone:
+      name:
+        type: string
+      slug:
+        type: string
+      updated_at:
         type: string
     type: object
-  branches.CreateBranchRequest:
+  categories.CreateCategoryRequest:
     properties:
-      address:
-        example: Jl. Sudirman No. 1
+      name:
         type: string
-      branch_code:
-        example: JKT-001
-        type: string
-      branch_location:
-        example: Jakarta Selatan
-        type: string
-      branch_name:
-        example: Jakarta Main Branch
-        type: string
-      email:
-        example: jakarta@store.com
-        type: string
-      is_active:
-        example: true
-        type: boolean
-      phone:
-        example: "+628123456789"
+      slug:
         type: string
     required:
-    - branch_code
-    - branch_location
-    - branch_name
+    - name
+    - slug
     type: object
-  branches.UpdateBranchRequest:
+  categories.UpdateCategoryRequest:
     properties:
-      address:
+      name:
         type: string
-      branch_code:
-        example: JKT-002
-        type: string
-      branch_location:
-        type: string
-      branch_name:
-        example: Jakarta Pusat Branch
-        type: string
-      email:
-        type: string
-      is_active:
-        example: true
-        type: boolean
-      phone:
+      slug:
         type: string
     type: object
   roles.CreateRoleRequest:
@@ -77,8 +40,8 @@ definitions:
         type: string
       permission_ids:
         example:
-        - '[''uuid-1'''
-        - ' ''uuid-2'']'
+        - '["uuid-1"'
+        - ' "uuid-2"]'
         items:
           type: string
         type: array
@@ -143,9 +106,6 @@ definitions:
     type: object
   users.RegisterRequest:
     properties:
-      branch_id:
-        example: 550e8400-e29b-41d4-a716-446655440000
-        type: string
       email:
         example: john@example.com
         type: string
@@ -156,7 +116,7 @@ definitions:
         example: secret123
         type: string
       role_id:
-        example: 550e8400-e29b-41d4-a716-446655440001
+        example: role-uuid-string
         type: string
       username:
         example: johndoe
@@ -171,13 +131,11 @@ definitions:
         example: true
         type: boolean
       role_id:
-        example: 550e8400-e29b-41d4-a716-446655440001
+        example: role-uuid-string
         type: string
     type: object
   users.UserResponse:
     properties:
-      branch_id:
-        type: string
       email:
         type: string
       full_name:
@@ -196,9 +154,9 @@ info:
   title: Backend ESTO API
   version: "1.0"
 paths:
-  /branches:
+  /api/categories:
     get:
-      description: Get list of all branches
+      description: Get list of all product categories
       produces:
       - application/json
       responses:
@@ -206,63 +164,83 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/branches.BranchResponse'
+              $ref: '#/definitions/categories.Category'
             type: array
-      summary: Get all branches
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get all categories
       tags:
-      - Branches
+      - categories
     post:
       consumes:
       - application/json
-      description: Create a new branch for a store
+      description: Create a new product category
       parameters:
-      - description: Branch Request
+      - description: Category Data
         in: body
-        name: request
+        name: input
         required: true
         schema:
-          $ref: '#/definitions/branches.CreateBranchRequest'
+          $ref: '#/definitions/categories.CreateCategoryRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/branches.BranchResponse'
+            $ref: '#/definitions/categories.Category'
         "400":
           description: Bad Request
           schema:
             additionalProperties:
               type: string
             type: object
-      summary: Create new branch
-      tags:
-      - Branches
-  /branches/{id}:
-    delete:
-      description: Delete branch by ID
-      parameters:
-      - description: Branch ID (UUID)
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
+        "500":
+          description: Internal Server Error
           schema:
             additionalProperties:
               type: string
             type: object
-      summary: Delete branch
+      summary: Create a new category
       tags:
-      - Branches
-    get:
-      description: Get details of a specific branch
+      - categories
+  /api/categories/{id}:
+    delete:
+      description: Delete category by UUID
       parameters:
-      - description: Branch ID (UUID)
+      - description: Category UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete a category
+      tags:
+      - categories
+    get:
+      description: Get details of a single category by its UUID
+      parameters:
+      - description: Category UUID
         in: path
         name: id
         required: true
@@ -273,39 +251,63 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/branches.BranchResponse'
-      summary: Get branch by ID
+            $ref: '#/definitions/categories.Category'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get category by ID
       tags:
-      - Branches
+      - categories
     put:
       consumes:
       - application/json
-      description: Update branch details
+      description: Update category details by UUID
       parameters:
-      - description: Branch ID (UUID)
+      - description: Category UUID
         in: path
         name: id
         required: true
         type: string
-      - description: Update Branch Request
+      - description: Updated Category Data
         in: body
-        name: request
+        name: input
         required: true
         schema:
-          $ref: '#/definitions/branches.UpdateBranchRequest'
+          $ref: '#/definitions/categories.UpdateCategoryRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/branches.BranchResponse'
-      summary: Update branch
+            $ref: '#/definitions/categories.Category'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update a category
       tags:
-      - Branches
+      - categories
   /permissions:
     get:
-      description: Get list of all available permissions (useful for frontend selection)
+      description: Get list of all available permissions
       produces:
       - application/json
       responses:
@@ -436,7 +438,7 @@ paths:
     delete:
       description: Soft delete user by ID
       parameters:
-      - description: User ID (UUID)
+      - description: User ID
         in: path
         name: id
         required: true
@@ -458,7 +460,7 @@ paths:
       - application/json
       description: Update user details including Role
       parameters:
-      - description: User ID (UUID)
+      - description: User ID
         in: path
         name: id
         required: true

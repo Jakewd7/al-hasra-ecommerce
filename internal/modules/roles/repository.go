@@ -1,19 +1,18 @@
 package roles
 
 import (
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 type Repository interface {
 	FindAll() ([]Role, error)
-	FindByID(id uuid.UUID) (*Role, error)
+	FindByID(id string) (*Role, error)
 	Create(role *Role) error
-	Update(role *Role, permissionIDs []uuid.UUID) error
-	Delete(id uuid.UUID) error
+	Update(role *Role, permissionIDs []string) error
+	Delete(id string) error
 
 	GetAllPermissions() ([]Permission, error)
-	GetPermissionsByIDs(ids []uuid.UUID) ([]Permission, error)
+	GetPermissionsByIDs(ids []string) ([]Permission, error)
 }
 
 type repository struct {
@@ -30,7 +29,7 @@ func (r *repository) FindAll() ([]Role, error) {
 	return roles, err
 }
 
-func (r *repository) FindByID(id uuid.UUID) (*Role, error) {
+func (r *repository) FindByID(id string) (*Role, error) {
 	var role Role
 	err := r.db.Preload("Permissions").First(&role, "id = ?", id).Error
 	return &role, err
@@ -40,7 +39,7 @@ func (r *repository) Create(role *Role) error {
 	return r.db.Create(role).Error
 }
 
-func (r *repository) Update(role *Role, permissionIDs []uuid.UUID) error {
+func (r *repository) Update(role *Role, permissionIDs []string) error {
 	return r.db.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Model(role).Updates(role).Error; err != nil {
 			return err
@@ -48,22 +47,23 @@ func (r *repository) Update(role *Role, permissionIDs []uuid.UUID) error {
 
 		if len(permissionIDs) > 0 {
 			var perms []Permission
-			if err := tx.Find(&perms, permissionIDs).Error; err != nil {
+			if err := tx.Where("id IN ?", permissionIDs).Find(&perms).Error; err != nil {
 				return err
 			}
 			if err := tx.Model(role).Association("Permissions").Replace(perms); err != nil {
 				return err
 			}
 		} else {
-			// Jika dikirim array kosong, hapus semua permission (opsional, tergantung logic bisnis)
-			// tx.Model(role).Association("Permissions").Clear()
+			if err := tx.Model(role).Association("Permissions").Clear(); err != nil {
+				return err
+			}
 		}
 
 		return nil
 	})
 }
 
-func (r *repository) Delete(id uuid.UUID) error {
+func (r *repository) Delete(id string) error {
 	return r.db.Select("Permissions").Delete(&Role{ID: id}).Error
 }
 
@@ -73,8 +73,11 @@ func (r *repository) GetAllPermissions() ([]Permission, error) {
 	return perms, err
 }
 
-func (r *repository) GetPermissionsByIDs(ids []uuid.UUID) ([]Permission, error) {
+func (r *repository) GetPermissionsByIDs(ids []string) ([]Permission, error) {
 	var perms []Permission
-	err := r.db.Find(&perms, ids).Error
+	if len(ids) == 0 {
+		return perms, nil
+	}
+	err := r.db.Where("id IN ?", ids).Find(&perms).Error
 	return perms, err
 }

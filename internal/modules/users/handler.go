@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 type Handler struct {
@@ -41,8 +40,8 @@ func (h *Handler) Refresh(c *gin.Context) {
 		return
 	}
 
-	c.SetCookie("access_token", response.AccessToken, 900, "/", "", false, true)         // 15 menit
-	c.SetCookie("refresh_token", response.RefreshToken, 3600*24*7, "/", "", false, true) // 7 hari
+	c.SetCookie("access_token", response.AccessToken, 900, "/", "", false, true)
+	c.SetCookie("refresh_token", response.RefreshToken, 3600*24*7, "/", "", false, true)
 
 	c.JSON(http.StatusOK, response)
 }
@@ -97,7 +96,6 @@ func (h *Handler) Login(c *gin.Context) {
 	}
 
 	c.SetCookie("access_token", response.AccessToken, 3600*24, "/", "", false, true)
-
 	c.SetCookie("refresh_token", response.RefreshToken, 3600*24*7, "/", "", false, true)
 
 	c.JSON(http.StatusOK, response)
@@ -111,6 +109,7 @@ func (h *Handler) Login(c *gin.Context) {
 // @Router /users/logout [post]
 func (h *Handler) Logout(c *gin.Context) {
 	c.SetCookie("access_token", "", -1, "/", "", false, true)
+	c.SetCookie("refresh_token", "", -1, "/", "", false, true)
 
 	c.JSON(http.StatusOK, gin.H{"message": "Successfully logged out"})
 }
@@ -137,16 +136,15 @@ func (h *Handler) GetUsers(c *gin.Context) {
 // @Tags Users
 // @Accept json
 // @Produce json
-// @Param id path string true "User ID (UUID)"
+// @Param id path string true "User ID"
 // @Param request body UpdateUserRequest true "Update Request"
 // @Success 200 {object} UserResponse
 // @Failure 400 {object} map[string]string
 // @Router /users/{id} [put]
 func (h *Handler) UpdateUser(c *gin.Context) {
-	idParam := c.Param("id")
-	id, err := uuid.Parse(idParam)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid UUID"})
+	id := c.Param("id")
+	if id == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID parameter is required"})
 		return
 	}
 
@@ -170,14 +168,13 @@ func (h *Handler) UpdateUser(c *gin.Context) {
 // @Description Soft delete user by ID
 // @Tags Users
 // @Produce json
-// @Param id path string true "User ID (UUID)"
+// @Param id path string true "User ID"
 // @Success 200 {object} map[string]string
 // @Router /users/{id} [delete]
 func (h *Handler) DeleteUser(c *gin.Context) {
-	idParam := c.Param("id")
-	id, err := uuid.Parse(idParam)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid UUID"})
+	id := c.Param("id")
+	if id == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID parameter is required"})
 		return
 	}
 

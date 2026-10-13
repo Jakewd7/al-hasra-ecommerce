@@ -4,7 +4,6 @@ import (
 	"errors"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/jakewd7/internal/pkg/utils"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -14,8 +13,8 @@ type Service interface {
 	LoginUser(input LoginRequest) (LoginResponse, error)
 	RefreshToken(refreshToken string) (LoginResponse, error)
 	GetAllUsers() ([]UserResponse, error)
-	UpdateUser(id uuid.UUID, input UpdateUserRequest) (UserResponse, error)
-	DeleteUser(id uuid.UUID) error
+	UpdateUser(id string, input UpdateUserRequest) (UserResponse, error)
+	DeleteUser(id string) error
 }
 
 type service struct {
@@ -32,16 +31,17 @@ func (s *service) RegisterUser(input RegisterRequest) (UserResponse, error) {
 		return UserResponse{}, err
 	}
 
-	branchUUID, _ := uuid.Parse(input.BranchID)
-	roleUUID, _ := uuid.Parse(input.RoleID)
+	var roleID *string
+	if input.RoleID != "" {
+		roleID = &input.RoleID
+	}
 
 	user := User{
 		Username: input.Username,
 		Password: string(hashedPassword),
 		FullName: input.FullName,
 		Email:    &input.Email,
-		BranchID: branchUUID,
-		RoleID:   roleUUID,
+		RoleID:   roleID,
 		IsActive: true,
 	}
 
@@ -54,22 +54,26 @@ func (s *service) RegisterUser(input RegisterRequest) (UserResponse, error) {
 		Username: user.Username,
 		FullName: user.FullName,
 		RoleID:   user.RoleID,
-		BranchID: user.BranchID,
 		Email:    user.Email,
 	}, nil
 }
 
 func (s *service) LoginUser(input LoginRequest) (LoginResponse, error) {
-	// 1. Cek User & Password (Standar)
 	user, err := s.repository.FindByUsername(input.Username)
 	if err != nil {
 		return LoginResponse{}, errors.New("invalid credentials")
 	}
+
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password)); err != nil {
 		return LoginResponse{}, errors.New("invalid credentials")
 	}
 
-	accessToken, err := utils.GenerateJWT(user.ID, user.RoleID)
+	var roleIDStr string
+	if user.RoleID != nil {
+		roleIDStr = *user.RoleID
+	}
+
+	accessToken, err := utils.GenerateJWT(user.ID, roleIDStr)
 	if err != nil {
 		return LoginResponse{}, err
 	}
@@ -103,13 +107,12 @@ func (s *service) GetAllUsers() ([]UserResponse, error) {
 			FullName: u.FullName,
 			Email:    u.Email,
 			RoleID:   u.RoleID,
-			BranchID: u.BranchID,
 		})
 	}
 	return userResponses, nil
 }
 
-func (s *service) UpdateUser(id uuid.UUID, input UpdateUserRequest) (UserResponse, error) {
+func (s *service) UpdateUser(id string, input UpdateUserRequest) (UserResponse, error) {
 	user, err := s.repository.FindByID(id)
 	if err != nil {
 		return UserResponse{}, err
@@ -119,8 +122,7 @@ func (s *service) UpdateUser(id uuid.UUID, input UpdateUserRequest) (UserRespons
 		user.FullName = input.FullName
 	}
 	if input.RoleID != "" {
-		roleUUID, _ := uuid.Parse(input.RoleID)
-		user.RoleID = roleUUID
+		user.RoleID = &input.RoleID
 	}
 	if input.IsActive != nil {
 		user.IsActive = *input.IsActive
@@ -137,10 +139,11 @@ func (s *service) UpdateUser(id uuid.UUID, input UpdateUserRequest) (UserRespons
 		Username: user.Username,
 		FullName: user.FullName,
 		RoleID:   user.RoleID,
+		Email:    user.Email,
 	}, nil
 }
 
-func (s *service) DeleteUser(id uuid.UUID) error {
+func (s *service) DeleteUser(id string) error {
 	return s.repository.Delete(id)
 }
 
@@ -150,14 +153,21 @@ func (s *service) RefreshToken(refreshToken string) (LoginResponse, error) {
 		return LoginResponse{}, errors.New("invalid refresh token")
 	}
 
-	newAccessToken, err := utils.GenerateJWT(user.ID, user.RoleID)
+	var roleIDStr string
+	if user.RoleID != nil {
+		roleIDStr = *user.RoleID
+	}
+
+	newAccessToken, err := utils.GenerateJWT(user.ID, roleIDStr)
 	if err != nil {
 		return LoginResponse{}, err
 	}
 
 	newRefreshToken := utils.GenerateSHA256Token()
 	user.RefreshToken = newRefreshToken
-	s.repository.Update(user)
+	if err := s.repository.Update(user); err != nil {
+		return LoginResponse{}, err
+	}
 
 	return LoginResponse{
 		AccessToken:  newAccessToken,

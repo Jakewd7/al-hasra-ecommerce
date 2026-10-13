@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 type Handler struct {
@@ -68,10 +67,9 @@ func (h *Handler) CreateRole(c *gin.Context) {
 // @Failure 400 {object} map[string]string
 // @Router /roles/{id} [put]
 func (h *Handler) UpdateRole(c *gin.Context) {
-	idParam := c.Param("id")
-	id, err := uuid.Parse(idParam)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid UUID"})
+	id := c.Param("id")
+	if id == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID parameter is required"})
 		return
 	}
 
@@ -98,10 +96,9 @@ func (h *Handler) UpdateRole(c *gin.Context) {
 // @Failure 400 {object} map[string]string
 // @Router /roles/{id} [delete]
 func (h *Handler) DeleteRole(c *gin.Context) {
-	idParam := c.Param("id")
-	id, err := uuid.Parse(idParam)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid UUID"})
+	id := c.Param("id")
+	if id == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID parameter is required"})
 		return
 	}
 
@@ -114,7 +111,7 @@ func (h *Handler) DeleteRole(c *gin.Context) {
 
 // GetPermissions godoc
 // @Summary Get all permissions
-// @Description Get list of all available permissions (useful for frontend selection)
+// @Description Get list of all available permissions
 // @Tags Roles
 // @Produce json
 // @Success 200 {array} PermissionResponse

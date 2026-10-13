@@ -15,30 +15,39 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/branches": {
+        "/api/categories": {
             "get": {
-                "description": "Get list of all branches",
+                "description": "Get list of all product categories",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Branches"
+                    "categories"
                 ],
-                "summary": "Get all branches",
+                "summary": "Get all categories",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/branches.BranchResponse"
+                                "$ref": "#/definitions/categories.Category"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
                             }
                         }
                     }
                 }
             },
             "post": {
-                "description": "Create a new branch for a store",
+                "description": "Create a new product category",
                 "consumes": [
                     "application/json"
                 ],
@@ -46,17 +55,17 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Branches"
+                    "categories"
                 ],
-                "summary": "Create new branch",
+                "summary": "Create a new category",
                 "parameters": [
                     {
-                        "description": "Branch Request",
-                        "name": "request",
+                        "description": "Category Data",
+                        "name": "input",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/branches.CreateBranchRequest"
+                            "$ref": "#/definitions/categories.CreateCategoryRequest"
                         }
                     }
                 ],
@@ -64,7 +73,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/branches.BranchResponse"
+                            "$ref": "#/definitions/categories.Category"
                         }
                     },
                     "400": {
@@ -75,24 +84,33 @@ const docTemplate = `{
                                 "type": "string"
                             }
                         }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
                     }
                 }
             }
         },
-        "/branches/{id}": {
+        "/api/categories/{id}": {
             "get": {
-                "description": "Get details of a specific branch",
+                "description": "Get details of a single category by its UUID",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Branches"
+                    "categories"
                 ],
-                "summary": "Get branch by ID",
+                "summary": "Get category by ID",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Branch ID (UUID)",
+                        "description": "Category UUID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -102,13 +120,31 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/branches.BranchResponse"
+                            "$ref": "#/definitions/categories.Category"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
             },
             "put": {
-                "description": "Update branch details",
+                "description": "Update category details by UUID",
                 "consumes": [
                     "application/json"
                 ],
@@ -116,24 +152,24 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Branches"
+                    "categories"
                 ],
-                "summary": "Update branch",
+                "summary": "Update a category",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Branch ID (UUID)",
+                        "description": "Category UUID",
                         "name": "id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "Update Branch Request",
-                        "name": "request",
+                        "description": "Updated Category Data",
+                        "name": "input",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/branches.UpdateBranchRequest"
+                            "$ref": "#/definitions/categories.UpdateCategoryRequest"
                         }
                     }
                 ],
@@ -141,32 +177,62 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/branches.BranchResponse"
+                            "$ref": "#/definitions/categories.Category"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
             },
             "delete": {
-                "description": "Delete branch by ID",
+                "description": "Delete category by UUID",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Branches"
+                    "categories"
                 ],
-                "summary": "Delete branch",
+                "summary": "Delete a category",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Branch ID (UUID)",
+                        "description": "Category UUID",
                         "name": "id",
                         "in": "path",
                         "required": true
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -179,7 +245,7 @@ const docTemplate = `{
         },
         "/permissions": {
             "get": {
-                "description": "Get list of all available permissions (useful for frontend selection)",
+                "description": "Get list of all available permissions",
                 "produces": [
                     "application/json"
                 ],
@@ -503,7 +569,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "User ID (UUID)",
+                        "description": "User ID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -548,7 +614,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "User ID (UUID)",
+                        "description": "User ID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -569,98 +635,48 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "branches.BranchResponse": {
+        "categories.Category": {
             "type": "object",
             "properties": {
-                "address": {
-                    "type": "string"
-                },
-                "branch_code": {
-                    "type": "string"
-                },
-                "branch_location": {
-                    "type": "string"
-                },
-                "branch_name": {
-                    "type": "string"
-                },
-                "email": {
+                "created_at": {
                     "type": "string"
                 },
                 "id": {
                     "type": "string"
                 },
-                "is_active": {
-                    "type": "boolean"
+                "name": {
+                    "type": "string"
                 },
-                "phone": {
+                "slug": {
+                    "type": "string"
+                },
+                "updated_at": {
                     "type": "string"
                 }
             }
         },
-        "branches.CreateBranchRequest": {
+        "categories.CreateCategoryRequest": {
             "type": "object",
             "required": [
-                "branch_code",
-                "branch_location",
-                "branch_name"
+                "name",
+                "slug"
             ],
             "properties": {
-                "address": {
-                    "type": "string",
-                    "example": "Jl. Sudirman No. 1"
+                "name": {
+                    "type": "string"
                 },
-                "branch_code": {
-                    "type": "string",
-                    "example": "JKT-001"
-                },
-                "branch_location": {
-                    "type": "string",
-                    "example": "Jakarta Selatan"
-                },
-                "branch_name": {
-                    "type": "string",
-                    "example": "Jakarta Main Branch"
-                },
-                "email": {
-                    "type": "string",
-                    "example": "jakarta@store.com"
-                },
-                "is_active": {
-                    "type": "boolean",
-                    "example": true
-                },
-                "phone": {
-                    "type": "string",
-                    "example": "+628123456789"
+                "slug": {
+                    "type": "string"
                 }
             }
         },
-        "branches.UpdateBranchRequest": {
+        "categories.UpdateCategoryRequest": {
             "type": "object",
             "properties": {
-                "address": {
+                "name": {
                     "type": "string"
                 },
-                "branch_code": {
-                    "type": "string",
-                    "example": "JKT-002"
-                },
-                "branch_location": {
-                    "type": "string"
-                },
-                "branch_name": {
-                    "type": "string",
-                    "example": "Jakarta Pusat Branch"
-                },
-                "email": {
-                    "type": "string"
-                },
-                "is_active": {
-                    "type": "boolean",
-                    "example": true
-                },
-                "phone": {
+                "slug": {
                     "type": "string"
                 }
             }
@@ -685,8 +701,8 @@ const docTemplate = `{
                         "type": "string"
                     },
                     "example": [
-                        "['uuid-1'",
-                        " 'uuid-2']"
+                        "[\"uuid-1\"",
+                        " \"uuid-2\"]"
                     ]
                 }
             }
@@ -779,10 +795,6 @@ const docTemplate = `{
         "users.RegisterRequest": {
             "type": "object",
             "properties": {
-                "branch_id": {
-                    "type": "string",
-                    "example": "550e8400-e29b-41d4-a716-446655440000"
-                },
                 "email": {
                     "type": "string",
                     "example": "john@example.com"
@@ -797,7 +809,7 @@ const docTemplate = `{
                 },
                 "role_id": {
                     "type": "string",
-                    "example": "550e8400-e29b-41d4-a716-446655440001"
+                    "example": "role-uuid-string"
                 },
                 "username": {
                     "type": "string",
@@ -818,16 +830,13 @@ const docTemplate = `{
                 },
                 "role_id": {
                     "type": "string",
-                    "example": "550e8400-e29b-41d4-a716-446655440001"
+                    "example": "role-uuid-string"
                 }
             }
         },
         "users.UserResponse": {
             "type": "object",
             "properties": {
-                "branch_id": {
-                    "type": "string"
-                },
                 "email": {
                     "type": "string"
                 },

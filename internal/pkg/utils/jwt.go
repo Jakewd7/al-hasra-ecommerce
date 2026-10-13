@@ -21,15 +21,20 @@ func getSecretKey() []byte {
 }
 
 type JWTCustomClaims struct {
-	UserID uuid.UUID `json:"user_id"`
-	RoleID uuid.UUID `json:"role_id"`
+	UserID string  `json:"user_id"`
+	RoleID *string `json:"role_id,omitempty"`
 	jwt.RegisteredClaims
 }
 
-func GenerateJWT(userID uuid.UUID, roleID uuid.UUID) (string, error) {
+func GenerateJWT(userID string, roleID string) (string, error) {
+	var roleIDPtr *string
+	if roleID != "" {
+		roleIDPtr = &roleID
+	}
+
 	claims := JWTCustomClaims{
 		UserID: userID,
-		RoleID: roleID,
+		RoleID: roleIDPtr,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(15 * time.Minute)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),

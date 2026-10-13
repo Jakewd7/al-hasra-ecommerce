@@ -22,5 +22,4 @@ func RegisterRoutes(r *gin.RouterGroup, db *gorm.DB) {
 	{
 		permission.GET("", roleHandler.GetPermissions)
 	}
-
 }

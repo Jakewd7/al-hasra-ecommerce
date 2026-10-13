@@ -8,7 +8,7 @@ import (
 )
 
 type Role struct {
-	ID          uuid.UUID    `gorm:"type:uuid;primaryKey"`
+	ID          string       `gorm:"type:varchar(100);primaryKey"`
 	Name        string       `gorm:"type:varchar(50);unique;not null"`
 	Description string       `gorm:"type:text"`
 	Permissions []Permission `gorm:"many2many:role_permissions;"`
@@ -17,41 +17,33 @@ type Role struct {
 }
 
 type Permission struct {
-	ID          uuid.UUID `gorm:"type:uuid;primaryKey"`
-	Name        string    `gorm:"type:varchar(50);unique;not null"`
-	Description string    `gorm:"type:text"`
-	Module      string    `gorm:"type:varchar(50)"`
-	Action      string    `gorm:"type:varchar(50)"`
-	Roles       []Role    `gorm:"many2many:role_permissions;"`
+	ID          string `gorm:"type:varchar(100);primaryKey"`
+	Name        string `gorm:"type:varchar(50);unique;not null"`
+	Description string `gorm:"type:text"`
+	Module      string `gorm:"type:varchar(50)"`
+	Action      string `gorm:"type:varchar(50)"`
+	Roles       []Role `gorm:"many2many:role_permissions;"`
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 }
 
 type RolePermission struct {
-	ID           uuid.UUID `gorm:"type:uuid;primaryKey"`
-	RoleID       uuid.UUID `gorm:"type:uuid;primaryKey"`
-	PermissionID uuid.UUID `gorm:"type:uuid;primaryKey"`
+	RoleID       string `gorm:"type:varchar(100);primaryKey"`
+	PermissionID string `gorm:"type:varchar(100);primaryKey"`
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 }
 
 func (r *Role) BeforeCreate(tx *gorm.DB) error {
-	if r.ID == uuid.Nil {
-		r.ID = uuid.New()
+	if r.ID == "" {
+		r.ID = uuid.New().String()
 	}
 	return nil
 }
 
 func (p *Permission) BeforeCreate(tx *gorm.DB) error {
-	if p.ID == uuid.Nil {
-		p.ID = uuid.New()
-	}
-	return nil
-}
-
-func (rp *RolePermission) BeforeCreate(tx *gorm.DB) error {
-	if rp.ID == uuid.Nil {
-		rp.ID = uuid.New()
+	if p.ID == "" {
+		p.ID = uuid.New().String()
 	}
 	return nil
 }
@@ -59,7 +51,7 @@ func (rp *RolePermission) BeforeCreate(tx *gorm.DB) error {
 type CreateRoleRequest struct {
 	Name          string   `json:"name" example:"Store Manager" binding:"required"`
 	Description   string   `json:"description" example:"Manager of a specific store branch"`
-	PermissionIDs []string `json:"permission_ids" example:"['uuid-1', 'uuid-2']"`
+	PermissionIDs []string `json:"permission_ids" example:"[\"uuid-1\", \"uuid-2\"]"`
 }
 
 type UpdateRoleRequest struct {
@@ -69,15 +61,15 @@ type UpdateRoleRequest struct {
 }
 
 type RoleResponse struct {
-	ID          uuid.UUID            `json:"id"`
+	ID          string               `json:"id"`
 	Name        string               `json:"name"`
 	Description string               `json:"description"`
 	Permissions []PermissionResponse `json:"permissions"`
 }
 
 type PermissionResponse struct {
-	ID     uuid.UUID `json:"id"`
-	Name   string    `json:"name"`
-	Module string    `json:"module"`
-	Action string    `json:"action"`
+	ID     string `json:"id"`
+	Name   string `json:"name"`
+	Module string `json:"module"`
+	Action string `json:"action"`
 }

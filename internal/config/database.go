@@ -8,10 +8,9 @@ import (
 	"os"
 	"strings"
 
-	"gorm.io/driver/postgres"
+	_ "github.com/go-sql-driver/mysql"
+	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-
-	_ "github.com/lib/pq"
 )
 
 var DB *gorm.DB
@@ -21,7 +20,7 @@ func ConnectDatabase() *gorm.DB {
 
 	dbURL := os.Getenv("DB_URL")
 	if dbURL != "" {
-		db, err := gorm.Open(postgres.Open(dbURL), &gorm.Config{})
+		db, err := gorm.Open(mysql.Open(dbURL), &gorm.Config{})
 		if err == nil {
 			DB = db
 			fmt.Println("Connected using DB_URL")
@@ -32,21 +31,21 @@ func ConnectDatabase() *gorm.DB {
 	}
 
 	dsnRoot := fmt.Sprintf(
-		"host=%s port=%s user=%s password=%s dbname=postgres sslmode=disable",
-		cfg.Host,
-		cfg.Port,
+		"%s:%s@tcp(%s:%s)/?charset=utf8mb4&parseTime=True&loc=Local",
 		cfg.User,
 		cfg.Pass,
+		cfg.Host,
+		cfg.Port,
 	)
 
-	sqlDB, err := sql.Open("postgres", dsnRoot)
+	sqlDB, err := sql.Open("mysql", dsnRoot)
 	if err != nil {
-		panic("Failed to connect to PostgreSQL server.")
+		panic("Failed to connect to MySQL server.")
 	}
 	defer sqlDB.Close()
 
 	var exists bool
-	query := `SELECT EXISTS (SELECT 1 FROM pg_database WHERE datname = $1)`
+	query := `SELECT EXISTS (SELECT 1 FROM information_schema.SCHEMATA WHERE SCHEMA_NAME = ?)`
 	err = sqlDB.QueryRow(query, cfg.Name).Scan(&exists)
 	if err != nil {
 		panic("Error checking database: " + err.Error())
@@ -70,15 +69,15 @@ func ConnectDatabase() *gorm.DB {
 	}
 
 	dsn := fmt.Sprintf(
-		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable TimeZone=Asia/Jakarta",
-		cfg.Host,
-		cfg.Port,
+		"%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		cfg.User,
 		cfg.Pass,
+		cfg.Host,
+		cfg.Port,
 		cfg.Name,
 	)
 
-	database, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	database, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic("Failed to connect to the database.")
 	}

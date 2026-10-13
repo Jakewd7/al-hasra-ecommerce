@@ -47,5 +47,5 @@ func NewApp() *App {
 func (a *App) Run() {
 	port := config.Get("APP_PORT", "8080")
 	log.Println("🚀 server running on", port)
-	a.Router.Run("0.0.0.0:" + port)
+	a.Router.Run("localhost:" + port)
 }

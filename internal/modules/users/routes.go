@@ -19,16 +19,9 @@ func RegisterRoutes(public *gin.RouterGroup, protected *gin.RouterGroup, db *gor
 
 	userPrivate := protected.Group("/users")
 	{
-		// --- PERBAIKAN DI SINI ---
-		// Ganti "/" menjadi "" agar route-nya menjadi "/api/users" (tanpa slash di akhir)
 		userPrivate.GET("", handler.GetUsers)
-
-		// Route parameter (:id) sudah benar pakai slash karena diawali parameter
 		userPrivate.PUT("/:id", handler.UpdateUser)
 		userPrivate.DELETE("/:id", handler.DeleteUser)
-
-		// Route statis lain
-		// userPrivate.POST("/register", handler.Register)
 		userPrivate.POST("/logout", handler.Logout)
 	}
 }

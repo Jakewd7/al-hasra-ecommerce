@@ -2,16 +2,14 @@ package roles
 
 import (
 	"errors"
-
-	"github.com/google/uuid"
 )
 
 type Service interface {
 	GetAllRoles() ([]RoleResponse, error)
-	GetRoleByID(id uuid.UUID) (RoleResponse, error)
+	GetRoleByID(id string) (RoleResponse, error)
 	CreateRole(input CreateRoleRequest) (RoleResponse, error)
-	UpdateRole(id uuid.UUID, input UpdateRoleRequest) (RoleResponse, error)
-	DeleteRole(id uuid.UUID) error
+	UpdateRole(id string, input UpdateRoleRequest) (RoleResponse, error)
+	DeleteRole(id string) error
 
 	GetAllPermissions() ([]PermissionResponse, error)
 }
@@ -25,7 +23,7 @@ func NewService(repository Repository) Service {
 }
 
 func mapRoleToResponse(role Role) RoleResponse {
-	var permResponses []PermissionResponse
+	permResponses := make([]PermissionResponse, 0)
 	for _, p := range role.Permissions {
 		permResponses = append(permResponses, PermissionResponse{
 			ID:     p.ID,
@@ -48,14 +46,14 @@ func (s *service) GetAllRoles() ([]RoleResponse, error) {
 		return nil, err
 	}
 
-	var responses []RoleResponse
+	responses := make([]RoleResponse, 0)
 	for _, r := range roles {
 		responses = append(responses, mapRoleToResponse(r))
 	}
 	return responses, nil
 }
 
-func (s *service) GetRoleByID(id uuid.UUID) (RoleResponse, error) {
+func (s *service) GetRoleByID(id string) (RoleResponse, error) {
 	role, err := s.repository.FindByID(id)
 	if err != nil {
 		return RoleResponse{}, err
@@ -64,15 +62,7 @@ func (s *service) GetRoleByID(id uuid.UUID) (RoleResponse, error) {
 }
 
 func (s *service) CreateRole(input CreateRoleRequest) (RoleResponse, error) {
-	var permUUIDs []uuid.UUID
-	for _, idStr := range input.PermissionIDs {
-		id, err := uuid.Parse(idStr)
-		if err == nil {
-			permUUIDs = append(permUUIDs, id)
-		}
-	}
-
-	perms, err := s.repository.GetPermissionsByIDs(permUUIDs)
+	perms, err := s.repository.GetPermissionsByIDs(input.PermissionIDs)
 	if err != nil {
 		return RoleResponse{}, err
 	}
@@ -90,7 +80,7 @@ func (s *service) CreateRole(input CreateRoleRequest) (RoleResponse, error) {
 	return mapRoleToResponse(role), nil
 }
 
-func (s *service) UpdateRole(id uuid.UUID, input UpdateRoleRequest) (RoleResponse, error) {
+func (s *service) UpdateRole(id string, input UpdateRoleRequest) (RoleResponse, error) {
 	role, err := s.repository.FindByID(id)
 	if err != nil {
 		return RoleResponse{}, errors.New("role not found")
@@ -103,15 +93,7 @@ func (s *service) UpdateRole(id uuid.UUID, input UpdateRoleRequest) (RoleRespons
 		role.Description = input.Description
 	}
 
-	var permUUIDs []uuid.UUID
-	for _, idStr := range input.PermissionIDs {
-		pid, err := uuid.Parse(idStr)
-		if err == nil {
-			permUUIDs = append(permUUIDs, pid)
-		}
-	}
-
-	if err := s.repository.Update(role, permUUIDs); err != nil {
+	if err := s.repository.Update(role, input.PermissionIDs); err != nil {
 		return RoleResponse{}, err
 	}
 
@@ -119,7 +101,7 @@ func (s *service) UpdateRole(id uuid.UUID, input UpdateRoleRequest) (RoleRespons
 	return mapRoleToResponse(*updatedRole), nil
 }
 
-func (s *service) DeleteRole(id uuid.UUID) error {
+func (s *service) DeleteRole(id string) error {
 	return s.repository.Delete(id)
 }
 
@@ -129,7 +111,7 @@ func (s *service) GetAllPermissions() ([]PermissionResponse, error) {
 		return nil, err
 	}
 
-	var responses []PermissionResponse
+	responses := make([]PermissionResponse, 0)
 	for _, p := range perms {
 		responses = append(responses, PermissionResponse{
 			ID:     p.ID,

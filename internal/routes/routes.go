@@ -6,7 +6,10 @@ import (
 	"github.com/jakewd7/internal/modules/roles"
 	"github.com/jakewd7/internal/modules/users"
 	"gorm.io/gorm"
+
 	// [AUTO-IMPORT]
+	"github.com/jakewd7/internal/modules/categories"
+	"github.com/jakewd7/internal/modules/products"
 )
 
 func RegisterRoutes(publicGroup *gin.RouterGroup, db *gorm.DB) {
@@ -20,5 +23,7 @@ func RegisterRoutes(publicGroup *gin.RouterGroup, db *gorm.DB) {
 	roles.RegisterRoutes(protectedGroup, db)
 
 	// [AUTO-REGISTER]
+	products.RegisterRoutes(protectedGroup, db)
+	categories.RegisterRoutes(protectedGroup, db)
 
 }

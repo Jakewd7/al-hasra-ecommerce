@@ -1,7 +1,6 @@
 package users
 
 import (
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -9,10 +8,9 @@ type Repository interface {
 	Create(user *User) error
 	FindByUsername(username string) (*User, error)
 	FindAll() ([]User, error)
-	FindByID(id uuid.UUID) (*User, error)
+	FindByID(id string) (*User, error)
 	Update(user *User) error
-	Delete(id uuid.UUID) error
-
+	Delete(id string) error
 	FindByRefreshToken(token string) (*User, error)
 }
 
@@ -42,12 +40,11 @@ func (r *repository) FindByRefreshToken(token string) (*User, error) {
 
 func (r *repository) FindAll() ([]User, error) {
 	var users []User
-	// Bisa ditambahkan Preload("Role") jika ada relasi struct Role
 	err := r.db.Find(&users).Error
 	return users, err
 }
 
-func (r *repository) FindByID(id uuid.UUID) (*User, error) {
+func (r *repository) FindByID(id string) (*User, error) {
 	var user User
 	err := r.db.First(&user, "id = ?", id).Error
 	return &user, err
@@ -57,6 +54,6 @@ func (r *repository) Update(user *User) error {
 	return r.db.Save(user).Error
 }
 
-func (r *repository) Delete(id uuid.UUID) error {
+func (r *repository) Delete(id string) error {
 	return r.db.Delete(&User{}, "id = ?", id).Error
 }
