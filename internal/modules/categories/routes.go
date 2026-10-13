@@ -10,13 +10,13 @@ func RegisterRoutes(public *gin.RouterGroup, protected *gin.RouterGroup, db *gor
 	service := NewService(repo)
 	handler := NewHandler(service)
 
-	publicCategories := public.Group("/products")
+	publicCategories := public.Group("/categories")
 	{
 		publicCategories.GET("", handler.GetAll)
 		publicCategories.GET("/:id", handler.GetByID)
 	}
 
-	protectedCategories := protected.Group("/products")
+	protectedCategories := protected.Group("/categories")
 	{
 		protectedCategories.POST("", handler.CreateCategory)
 		protectedCategories.PUT("/:id", handler.Update)
