@@ -320,7 +320,7 @@ definitions:
       username:
         type: string
     type: object
-host: localhost:8000
+host: serverstaging-vps-5e6db201b3.asiahub.id
 info:
   contact: {}
   description: API backend layanan e-commerce Sekolah Al-Hasra.

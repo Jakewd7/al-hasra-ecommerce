@@ -6,7 +6,7 @@
         "contact": {},
         "version": "1.0"
     },
-    "host": "localhost:8000",
+    "host": "serverstaging-vps-5e6db201b3.asiahub.id",
     "basePath": "/api",
     "paths": {
         "/carts": {

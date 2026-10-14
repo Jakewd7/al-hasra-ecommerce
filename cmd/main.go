@@ -1,7 +1,7 @@
 // @title E-Commerce Al-Hasra API
 // @version 1.0
 // @description API backend layanan e-commerce Sekolah Al-Hasra.
-// @host localhost:8000
+// @host serverstaging-vps-5e6db201b3.asiahub.id
 // @BasePath /api
 
 // @securityDefinitions.apikey BearerAuth
