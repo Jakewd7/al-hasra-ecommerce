@@ -3,9 +3,9 @@ package orders
 import (
 	"errors"
 	"fmt"
+	"math/rand"
 	"time"
 
-	"github.com/jakewd7/internal/modules/products"
 	"gorm.io/gorm"
 )
 
@@ -27,41 +27,50 @@ func generateOrderNumber() string {
 	return fmt.Sprintf("INV-%d", time.Now().UnixNano())
 }
 
+func generateBCAVANumber() string {
+	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
+	return fmt.Sprintf("88001%08d", rng.Intn(100000000))
+}
+
 func mapOrderToResponse(order Order) OrderResponse {
 	var itemResponses []OrderItemResponse
 	for _, item := range order.OrderItems {
 		itemResponses = append(itemResponses, OrderItemResponse{
-			ID:        item.ID,
-			ProductID: item.ProductID,
-			Product: products.ProductResponse{
-				ID:          item.Product.ID,
-				CategoryID:  item.Product.CategoryID,
-				Name:        item.Product.Name,
-				Slug:        item.Product.Slug,
-				Description: item.Product.Description,
-				Price:       item.Product.Price,
-				Stock:       item.Product.Stock,
-				ImageURL:    item.Product.ImageURL,
-				IsActive:    item.Product.IsActive,
-			},
-			Price:    item.Price,
-			Quantity: item.Quantity,
-			Subtotal: item.Subtotal,
+			ProductID:   item.ProductID,
+			ProductName: item.Product.Name,
+			ImageURL:    item.Product.ImageURL,
+			Price:       item.Price,
+			Quantity:    item.Quantity,
+			Subtotal:    item.Subtotal,
 		})
 	}
 
+	var paymentResp *PaymentResponse
+	if order.Payment != nil {
+		expiresIn := int64(time.Until(order.Payment.ExpiredAt).Seconds())
+		if expiresIn < 0 {
+			expiresIn = 0
+		}
+		paymentResp = &PaymentResponse{
+			ID:            order.Payment.ID,
+			PaymentMethod: order.Payment.PaymentMethod,
+			VANumber:      order.Payment.VANumber,
+			Amount:        order.Payment.Amount,
+			Status:        order.Payment.Status,
+			ExpiredAt:     order.Payment.ExpiredAt,
+			ExpiresIn:     expiresIn,
+			PaidAt:        order.Payment.PaidAt,
+		}
+	}
+
 	return OrderResponse{
-		ID:              order.ID,
-		OrderNumber:     order.OrderNumber,
-		UserID:          order.UserID,
-		CustomerName:    order.CustomerName,
-		CustomerPhone:   order.CustomerPhone,
-		TotalAmount:     order.TotalAmount,
-		Status:          order.Status,
-		ShippingAddress: order.ShippingAddress,
-		OrderItems:      itemResponses,
-		CreatedAt:       order.CreatedAt,
-		UpdatedAt:       order.UpdatedAt,
+		ID:          order.ID,
+		OrderNumber: order.OrderNumber,
+		TotalAmount: order.TotalAmount,
+		Status:      order.Status,
+		OrderItems:  itemResponses,
+		Payment:     paymentResp,
+		CreatedAt:   order.CreatedAt,
 	}
 }
 
@@ -100,17 +109,27 @@ func (s *service) Checkout(input CheckoutRequest) (OrderResponse, error) {
 		}
 
 		createdOrder = Order{
-			OrderNumber:     generateOrderNumber(),
-			UserID:          input.UserID,
-			CustomerName:    input.CustomerName,
-			CustomerPhone:   input.CustomerPhone,
-			TotalAmount:     totalAmount,
-			Status:          "PENDING",
-			ShippingAddress: input.ShippingAddress,
-			OrderItems:      orderItems,
+			OrderNumber: generateOrderNumber(),
+			TotalAmount: totalAmount,
+			Status:      "PENDING",
+			OrderItems:  orderItems,
 		}
 
 		if err := s.repository.CreateOrder(tx, &createdOrder); err != nil {
+			return err
+		}
+
+		expiredAt := time.Now().Add(24 * time.Hour)
+		payment := Payment{
+			OrderID:       createdOrder.ID,
+			PaymentMethod: "BCA_VA",
+			VANumber:      generateBCAVANumber(),
+			Amount:        totalAmount,
+			Status:        "PENDING",
+			ExpiredAt:     expiredAt,
+		}
+
+		if err := s.repository.CreatePayment(tx, &payment); err != nil {
 			return err
 		}
 

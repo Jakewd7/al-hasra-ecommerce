@@ -7,6 +7,7 @@ import (
 
 type Repository interface {
 	CreateOrder(tx *gorm.DB, order *Order) error
+	CreatePayment(tx *gorm.DB, payment *Payment) error
 	FindAll() ([]Order, error)
 	FindByID(id string) (*Order, error)
 	GetDB() *gorm.DB
@@ -30,15 +31,19 @@ func (r *repository) CreateOrder(tx *gorm.DB, order *Order) error {
 	return tx.Create(order).Error
 }
 
+func (r *repository) CreatePayment(tx *gorm.DB, payment *Payment) error {
+	return tx.Create(payment).Error
+}
+
 func (r *repository) FindAll() ([]Order, error) {
 	var orders []Order
-	err := r.db.Preload("OrderItems.Product").Find(&orders).Error
+	err := r.db.Preload("OrderItems.Product").Preload("Payment").Find(&orders).Error
 	return orders, err
 }
 
 func (r *repository) FindByID(id string) (*Order, error) {
 	var order Order
-	err := r.db.Preload("OrderItems.Product").First(&order, "id = ?", id).Error
+	err := r.db.Preload("OrderItems.Product").Preload("Payment").First(&order, "id = ?", id).Error
 	return &order, err
 }
 

@@ -127,6 +127,13 @@ func (s *service) UpdateUser(id string, input UpdateUserRequest) (UserResponse, 
 	if input.IsActive != nil {
 		user.IsActive = *input.IsActive
 	}
+	if input.Password != "" {
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
+		if err != nil {
+			return UserResponse{}, err
+		}
+		user.Password = string(hashedPassword)
+	}
 
 	user.UpdatedAt = time.Now()
 

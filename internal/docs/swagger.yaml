@@ -1,35 +1,5 @@
 basePath: /api
 definitions:
-  carts.AddToCartRequest:
-    properties:
-      product_id:
-        type: string
-      quantity:
-        example: 1
-        type: integer
-      user_id:
-        type: string
-    required:
-    - product_id
-    - quantity
-    type: object
-  carts.CartResponse:
-    properties:
-      created_at:
-        type: string
-      id:
-        type: string
-      product:
-        $ref: '#/definitions/products.ProductResponse'
-      product_id:
-        type: string
-      quantity:
-        type: integer
-      updated_at:
-        type: string
-      user_id:
-        type: string
-    type: object
   categories.Category:
     properties:
       created_at:
@@ -72,36 +42,22 @@ definitions:
     type: object
   orders.CheckoutRequest:
     properties:
-      customer_name:
-        example: John Doe
-        type: string
-      customer_phone:
-        example: "08123456789"
-        type: string
       items:
         items:
           $ref: '#/definitions/orders.CheckoutItemRequest'
         type: array
-      shipping_address:
-        example: Jl. Raya Ciputat No. 12
-        type: string
-      user_id:
-        type: string
     required:
-    - customer_name
-    - customer_phone
     - items
-    - shipping_address
     type: object
   orders.OrderItemResponse:
     properties:
-      id:
+      image_url:
         type: string
       price:
         type: number
-      product:
-        $ref: '#/definitions/products.ProductResponse'
       product_id:
+        type: string
+      product_name:
         type: string
       quantity:
         type: integer
@@ -112,27 +68,38 @@ definitions:
     properties:
       created_at:
         type: string
-      customer_name:
-        type: string
-      customer_phone:
-        type: string
-      id:
-        type: string
-      order_items:
+      items:
         items:
           $ref: '#/definitions/orders.OrderItemResponse'
         type: array
+      order_id:
+        type: string
       order_number:
         type: string
-      shipping_address:
-        type: string
+      payment:
+        $ref: '#/definitions/orders.PaymentResponse'
       status:
         type: string
       total_amount:
         type: number
-      updated_at:
+    type: object
+  orders.PaymentResponse:
+    properties:
+      amount:
+        type: number
+      expired_at:
         type: string
-      user_id:
+      expires_in:
+        type: integer
+      paid_at:
+        type: string
+      payment_id:
+        type: string
+      payment_method:
+        type: string
+      status:
+        type: string
+      va_number:
         type: string
     type: object
   products.CreateProductRequest:
@@ -203,59 +170,40 @@ definitions:
       stock:
         type: integer
     type: object
-  roles.CreateRoleRequest:
+  sandboxes.PaySandboxRequest:
     properties:
-      description:
-        example: Manager of a specific store branch
+      va_number:
+        example: "8800112345678"
         type: string
-      name:
-        example: Store Manager
-        type: string
-      permission_ids:
-        example:
-        - '["uuid-1"'
-        - ' "uuid-2"]'
-        items:
-          type: string
-        type: array
     required:
-    - name
+    - va_number
     type: object
-  roles.PermissionResponse:
+  sandboxes.SandboxPaymentResponse:
     properties:
-      action:
+      amount:
+        type: number
+      expired_at:
         type: string
-      id:
-        type: string
-      module:
-        type: string
-      name:
-        type: string
-    type: object
-  roles.RoleResponse:
-    properties:
-      description:
-        type: string
-      id:
-        type: string
-      name:
-        type: string
-      permissions:
+      expires_in:
+        type: integer
+      items:
         items:
-          $ref: '#/definitions/roles.PermissionResponse'
+          $ref: '#/definitions/orders.OrderItemResponse'
         type: array
-    type: object
-  roles.UpdateRoleRequest:
-    properties:
-      description:
+      order_id:
         type: string
-      name:
-        example: Store Manager Updated
+      order_number:
         type: string
-      permission_ids:
-        items:
-          type: string
-        type: array
+      paid_at:
+        type: string
+      payment_id:
+        type: string
+      payment_method:
+        type: string
+      status:
+        type: string
+      va_number:
+        type: string
     type: object
   users.LoginRequest:
     properties:
@@ -303,6 +251,9 @@ definitions:
       is_active:
         example: true
         type: boolean
+      password:
+        example: ayambakar123lohyacik
+        type: string
       role_id:
         example: role-uuid-string
         type: string
@@ -327,73 +278,6 @@ info:
   title: E-Commerce Al-Hasra API
   version: "1.0"
 paths:
-  /carts:
-    get:
-      description: Get list of cart items
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/carts.CartResponse'
-            type: array
-      summary: Get all carts
-      tags:
-      - Carts
-    post:
-      consumes:
-      - application/json
-      description: Add product item to cart (guest mode or authenticated)
-      parameters:
-      - description: Add To Cart Request
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/carts.AddToCartRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/carts.CartResponse'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Add product to cart
-      tags:
-      - Carts
-  /carts/{id}:
-    delete:
-      description: Delete cart item by ID
-      parameters:
-      - description: Cart ID
-        in: path
-        name: id
-        required: true
-        type: string
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Delete cart item
-      tags:
-      - Carts
   /categories:
     get:
       description: Get list of all product categories
@@ -613,21 +497,6 @@ paths:
       summary: Process order checkout
       tags:
       - Orders
-  /permissions:
-    get:
-      description: Get list of all available permissions
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/roles.PermissionResponse'
-            type: array
-      summary: Get all permissions
-      tags:
-      - Roles
   /products:
     get:
       description: Get list of all active products
@@ -751,105 +620,61 @@ paths:
       summary: Update product
       tags:
       - Products
-  /roles:
-    get:
-      description: Get list of roles including their permissions
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/roles.RoleResponse'
-            type: array
-      summary: Get all roles
-      tags:
-      - Roles
+  /sandbox/pay:
     post:
       consumes:
       - application/json
-      description: Create a new role and assign permissions
+      description: Process payment by VA Number and update status from PENDING to
+        PAID
       parameters:
-      - description: Create Role Request
+      - description: Sandbox Payment Request
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/roles.CreateRoleRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/roles.RoleResponse'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Create new role
-      tags:
-      - Roles
-  /roles/{id}:
-    delete:
-      description: Delete role by ID
-      parameters:
-      - description: Role ID
-        in: path
-        name: id
-        required: true
-        type: string
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Delete role
-      tags:
-      - Roles
-    put:
-      consumes:
-      - application/json
-      description: Update role details and permissions
-      parameters:
-      - description: Role ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Update Role Request
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/roles.UpdateRoleRequest'
+          $ref: '#/definitions/sandboxes.PaySandboxRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/roles.RoleResponse'
+            additionalProperties: true
+            type: object
         "400":
           description: Bad Request
           schema:
             additionalProperties:
               type: string
             type: object
-      summary: Update role
+      summary: Simulate VA Payment (Sandbox)
       tags:
-      - Roles
+      - Sandbox
+  /sandbox/va/{va_number}:
+    get:
+      description: Get Virtual Account payment details by VA Number
+      parameters:
+      - description: VA Number
+        in: path
+        name: va_number
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/sandboxes.SandboxPaymentResponse'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Inquiry Virtual Account status
+      tags:
+      - Sandbox
   /users:
     get:
       description: Get list of all users

@@ -15,108 +15,6 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/carts": {
-            "get": {
-                "description": "Get list of cart items",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Carts"
-                ],
-                "summary": "Get all carts",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/carts.CartResponse"
-                            }
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "Add product item to cart (guest mode or authenticated)",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Carts"
-                ],
-                "summary": "Add product to cart",
-                "parameters": [
-                    {
-                        "description": "Add To Cart Request",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/carts.AddToCartRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/carts.CartResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/carts/{id}": {
-            "delete": {
-                "description": "Delete cart item by ID",
-                "tags": [
-                    "Carts"
-                ],
-                "summary": "Delete cart item",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Cart ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/categories": {
             "get": {
                 "description": "Get list of all product categories",
@@ -449,29 +347,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/permissions": {
-            "get": {
-                "description": "Get list of all available permissions",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Roles"
-                ],
-                "summary": "Get all permissions",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/roles.PermissionResponse"
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/products": {
             "get": {
                 "description": "Get list of all active products",
@@ -658,30 +533,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/roles": {
-            "get": {
-                "description": "Get list of roles including their permissions",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Roles"
-                ],
-                "summary": "Get all roles",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/roles.RoleResponse"
-                            }
-                        }
-                    }
-                }
-            },
+        "/sandbox/pay": {
             "post": {
-                "description": "Create a new role and assign permissions",
+                "description": "Process payment by VA Number and update status from PENDING to PAID",
                 "consumes": [
                     "application/json"
                 ],
@@ -689,25 +543,26 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Roles"
+                    "Sandbox"
                 ],
-                "summary": "Create new role",
+                "summary": "Simulate VA Payment (Sandbox)",
                 "parameters": [
                     {
-                        "description": "Create Role Request",
+                        "description": "Sandbox Payment Request",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/roles.CreateRoleRequest"
+                            "$ref": "#/definitions/sandboxes.PaySandboxRequest"
                         }
                     }
                 ],
                 "responses": {
-                    "201": {
-                        "description": "Created",
+                    "200": {
+                        "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/roles.RoleResponse"
+                            "type": "object",
+                            "additionalProperties": true
                         }
                     },
                     "400": {
@@ -722,66 +577,21 @@ const docTemplate = `{
                 }
             }
         },
-        "/roles/{id}": {
-            "put": {
-                "description": "Update role details and permissions",
-                "consumes": [
-                    "application/json"
-                ],
+        "/sandbox/va/{va_number}": {
+            "get": {
+                "description": "Get Virtual Account payment details by VA Number",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Roles"
+                    "Sandbox"
                 ],
-                "summary": "Update role",
+                "summary": "Inquiry Virtual Account status",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Role ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Update Role Request",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/roles.UpdateRoleRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/roles.RoleResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "Delete role by ID",
-                "tags": [
-                    "Roles"
-                ],
-                "summary": "Delete role",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Role ID",
-                        "name": "id",
+                        "description": "VA Number",
+                        "name": "va_number",
                         "in": "path",
                         "required": true
                     }
@@ -790,14 +600,11 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/sandboxes.SandboxPaymentResponse"
                         }
                     },
-                    "400": {
-                        "description": "Bad Request",
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -1027,51 +834,6 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "carts.AddToCartRequest": {
-            "type": "object",
-            "required": [
-                "product_id",
-                "quantity"
-            ],
-            "properties": {
-                "product_id": {
-                    "type": "string"
-                },
-                "quantity": {
-                    "type": "integer",
-                    "example": 1
-                },
-                "user_id": {
-                    "type": "string"
-                }
-            }
-        },
-        "carts.CartResponse": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "product": {
-                    "$ref": "#/definitions/products.ProductResponse"
-                },
-                "product_id": {
-                    "type": "string"
-                },
-                "quantity": {
-                    "type": "integer"
-                },
-                "updated_at": {
-                    "type": "string"
-                },
-                "user_id": {
-                    "type": "string"
-                }
-            }
-        },
         "categories.Category": {
             "type": "object",
             "properties": {
@@ -1136,48 +898,30 @@ const docTemplate = `{
         "orders.CheckoutRequest": {
             "type": "object",
             "required": [
-                "customer_name",
-                "customer_phone",
-                "items",
-                "shipping_address"
+                "items"
             ],
             "properties": {
-                "customer_name": {
-                    "type": "string",
-                    "example": "John Doe"
-                },
-                "customer_phone": {
-                    "type": "string",
-                    "example": "08123456789"
-                },
                 "items": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/orders.CheckoutItemRequest"
                     }
-                },
-                "shipping_address": {
-                    "type": "string",
-                    "example": "Jl. Raya Ciputat No. 12"
-                },
-                "user_id": {
-                    "type": "string"
                 }
             }
         },
         "orders.OrderItemResponse": {
             "type": "object",
             "properties": {
-                "id": {
+                "image_url": {
                     "type": "string"
                 },
                 "price": {
                     "type": "number"
                 },
-                "product": {
-                    "$ref": "#/definitions/products.ProductResponse"
-                },
                 "product_id": {
+                    "type": "string"
+                },
+                "product_name": {
                     "type": "string"
                 },
                 "quantity": {
@@ -1194,37 +938,54 @@ const docTemplate = `{
                 "created_at": {
                     "type": "string"
                 },
-                "customer_name": {
-                    "type": "string"
-                },
-                "customer_phone": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "order_items": {
+                "items": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/orders.OrderItemResponse"
                     }
                 },
+                "order_id": {
+                    "type": "string"
+                },
                 "order_number": {
                     "type": "string"
                 },
-                "shipping_address": {
-                    "type": "string"
+                "payment": {
+                    "$ref": "#/definitions/orders.PaymentResponse"
                 },
                 "status": {
                     "type": "string"
                 },
                 "total_amount": {
                     "type": "number"
+                }
+            }
+        },
+        "orders.PaymentResponse": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number"
                 },
-                "updated_at": {
+                "expired_at": {
                     "type": "string"
                 },
-                "user_id": {
+                "expires_in": {
+                    "type": "integer"
+                },
+                "paid_at": {
+                    "type": "string"
+                },
+                "payment_id": {
+                    "type": "string"
+                },
+                "payment_method": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "va_number": {
                     "type": "string"
                 }
             }
@@ -1328,84 +1089,56 @@ const docTemplate = `{
                 }
             }
         },
-        "roles.CreateRoleRequest": {
+        "sandboxes.PaySandboxRequest": {
             "type": "object",
             "required": [
-                "name"
+                "va_number"
             ],
             "properties": {
-                "description": {
+                "va_number": {
                     "type": "string",
-                    "example": "Manager of a specific store branch"
-                },
-                "name": {
-                    "type": "string",
-                    "example": "Store Manager"
-                },
-                "permission_ids": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    },
-                    "example": [
-                        "[\"uuid-1\"",
-                        " \"uuid-2\"]"
-                    ]
+                    "example": "8800112345678"
                 }
             }
         },
-        "roles.PermissionResponse": {
+        "sandboxes.SandboxPaymentResponse": {
             "type": "object",
             "properties": {
-                "action": {
+                "amount": {
+                    "type": "number"
+                },
+                "expired_at": {
                     "type": "string"
                 },
-                "id": {
-                    "type": "string"
+                "expires_in": {
+                    "type": "integer"
                 },
-                "module": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
-        "roles.RoleResponse": {
-            "type": "object",
-            "properties": {
-                "description": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "permissions": {
+                "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/roles.PermissionResponse"
+                        "$ref": "#/definitions/orders.OrderItemResponse"
                     }
-                }
-            }
-        },
-        "roles.UpdateRoleRequest": {
-            "type": "object",
-            "properties": {
-                "description": {
+                },
+                "order_id": {
                     "type": "string"
                 },
-                "name": {
-                    "type": "string",
-                    "example": "Store Manager Updated"
+                "order_number": {
+                    "type": "string"
                 },
-                "permission_ids": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
+                "paid_at": {
+                    "type": "string"
+                },
+                "payment_id": {
+                    "type": "string"
+                },
+                "payment_method": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "va_number": {
+                    "type": "string"
                 }
             }
         },
@@ -1474,6 +1207,10 @@ const docTemplate = `{
                 "is_active": {
                     "type": "boolean",
                     "example": true
+                },
+                "password": {
+                    "type": "string",
+                    "example": "ayambakar123lohyacik"
                 },
                 "role_id": {
                     "type": "string",

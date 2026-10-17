@@ -55,6 +55,7 @@ type UpdateUserRequest struct {
 	FullName string `json:"full_name" example:"John Doe Updated"`
 	RoleID   string `json:"role_id" example:"role-uuid-string"`
 	IsActive *bool  `json:"is_active" example:"true"`
+	Password string `json:"password,omitempty" example:"ayambakar123lohyacik"`
 }
 
 type UserResponse struct {
