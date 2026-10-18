@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TKJ's Store</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <header class="navbar">
+    <div class="container navbar-container">
+      <div class="logo">
+        <h2>TKJ's Store</h2>
+      </div>
+      <button id="hamburger-btn" class="hamburger-btn" aria-label="Toggle Navigation">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <nav id="nav-menu" class="nav-menu">
+        <a href="#landing" class="nav-link">Home</a>
+        <a href="#katalog" class="nav-link">Catalog</a>
+        <button id="btn-open-cart" class="btn-cart">
+          🛒 Cart (<span id="cart-counter">0</span>)
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <section id="landing" class="hero-section">
+    <div class="container hero-container">
+      <div class="hero-text">
+        <span class="hero-badge">Special Collection 2026</span>
+        <h1>Discover Quality Gear at <br><span class="text-primary">TKJ's Store</span></h1>
+        <p>
+          Explore premium tech essentials, accessories, and daily lifestyle products 
+          with fast online ordering and seamless instant checkout.
+        </p>
+        <a href="#katalog" class="btn btn-primary">Shop Collection ↓</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="katalog" class="catalog-section">
+    <div class="container">
+      <div class="section-header">
+        <h2>Featured Catalog</h2>
+        <p>Handpicked essentials crafted for everyday productivity and modern living.</p>
+      </div>
+
+      <div id="product-grid" class="product-grid">
+        <div class="loading-state">Loading products from catalog...</div>
+      </div>
+
+      <div class="pagination-wrapper">
+        <button id="btn-prev-page" class="btn btn-secondary btn-page">
+          ◀ Prev
+        </button>
+        <span id="page-info" class="page-info">
+          Page 1 of 1
+        </span>
+        <button id="btn-next-page" class="btn btn-secondary btn-page">
+          Next ▶
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <div id="cart-modal" class="modal-backdrop hidden">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>🛒 Shopping Cart</h3>
+        <button id="btn-close-cart" class="btn-close" title="Close">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div id="cart-items-list" class="cart-items-list"></div>
+
+        <div class="cart-total-box">
+          <span>Total Amount:</span>
+          <strong id="cart-grand-total" class="total-price">Rp 0</strong>
+        </div>
+
+        <div class="checkout-form-container">
+          <h4>Checkout Details:</h4>
+          <form id="checkout-form">
+            <div class="form-group">
+              <label for="buyer-name">Customer Name:</label>
+              <input 
+                type="text" 
+                id="buyer-name" 
+                placeholder="Enter your full name..." 
+                autocomplete="off"
+              />
+            </div>
+            <button type="submit" id="btn-submit-order" class="btn btn-primary btn-block">
+              Proceed to Order ➔
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button id="btn-continue-shopping" class="btn btn-secondary">
+          Continue Shopping
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="invoice-modal" class="modal-backdrop hidden">
+    <div class="modal-box invoice-box">
+      <div class="modal-header">
+        <h3>🧾 Order Invoice</h3>
+        <button id="btn-close-invoice" class="btn-close" title="Close">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="status-banner">
+          <span>Order Status:</span>
+          <span id="invoice-status" class="badge badge-pending">PENDING</span>
+        </div>
+
+        <div class="invoice-details">
+          <div class="detail-row">
+            <span>Order ID:</span>
+            <strong id="invoice-order-number">-</strong>
+          </div>
+          <div class="detail-row">
+            <span>Customer:</span>
+            <strong id="invoice-buyer-name">-</strong>
+          </div>
+          <div class="detail-row">
+            <span>Payment Method:</span>
+            <strong>BCA Virtual Account</strong>
+          </div>
+          <div class="detail-row va-highlight">
+            <span>VA Number:</span>
+            <div class="va-wrapper">
+              <strong id="invoice-va-number" class="va-code">-</strong>
+              <button id="btn-copy-va" class="btn-copy" type="button">Copy</button>
+            </div>
+          </div>
+          <div class="detail-row">
+            <span>Total Due:</span>
+            <strong id="invoice-total-amount" class="text-primary">-</strong>
+          </div>
+        </div>
+
+        <div id="payment-instructions" class="payment-instructions">
+          <p class="inst-title">Virtual Account Payment Steps:</p>
+          <ol>
+            <li>Open your Mobile Banking or ATM.</li>
+            <li>Select <strong>Transfer ➔ Virtual Account</strong>.</li>
+            <li>Input the Virtual Account number above and confirm the transaction.</li>
+          </ol>
+        </div>
+
+        <div id="sandbox-action-box" class="sandbox-box">
+          <button id="btn-pay-sandbox" class="btn btn-success btn-block">
+            Pay Now
+          </button>
+        </div>
+
+        <div id="payment-success-box" class="success-box hidden">
+          <h4>Payment Confirmed</h4>
+          <p>Your payment has been received and your order is now being processed.</p>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button id="btn-finish-invoice" class="btn btn-secondary">
+          Close & Back to Store
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <p>© 2026 TKJ's Store. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
