@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simulator Pembayaran BCA</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="sandbox-page">
+  <div class="sandbox-card">
+    <h2 class="text-primary" style="margin-bottom: 14px;">Simulator BCA</h2>
+    
+    <div class="form-group">
+      <label for="va-input">Nomor Virtual Account:</label>
+      <input type="text" id="va-input" placeholder="88001xxxx" />
+    </div>
+    <button class="btn btn-primary btn-block" onclick="cekTagihan()">Cek Tagihan</button>
+
+    <div id="bill-card" class="invoice-details hidden" style="margin-top: 16px;">
+      <div class="detail-row"><span>Order:</span><strong id="info-order">-</strong></div>
+      <div class="detail-row"><span>Total:</span><strong id="info-total" class="text-primary">Rp 0</strong></div>
+      <div class="detail-row"><span>Status:</span><strong id="info-status">PENDING</strong></div>
+      <button id="btn-pay" class="btn btn-simulator btn-block" style="margin-top: 10px;" onclick="bayarTagihan()">Bayar Sekarang</button>
+    </div>
+
+    <p style="text-align: center; margin-top: 16px;">
+      <a href="index.html" class="nav-link">← Kembali ke Toko Online</a>
+    </p>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TKJ's Store</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -21,6 +24,7 @@
       <nav id="nav-menu" class="nav-menu">
         <a href="#landing" class="nav-link">Home</a>
         <a href="#katalog" class="nav-link">Catalog</a>
+        <a href="sandbox.html" target="_blank" class="nav-link nav-sandbox-link">💳 Simulator Bayar</a>
         <button id="btn-open-cart" class="btn-cart">
           🛒 Cart (<span id="cart-counter">0</span>)
         </button>
@@ -149,23 +153,29 @@
         </div>
 
         <div id="payment-instructions" class="payment-instructions">
-          <p class="inst-title">Virtual Account Payment Steps:</p>
+          <p class="inst-title">Petunjuk Pembayaran BCA Virtual Account:</p>
           <ol>
-            <li>Open your Mobile Banking or ATM.</li>
-            <li>Select <strong>Transfer ➔ Virtual Account</strong>.</li>
-            <li>Input the Virtual Account number above and confirm the transaction.</li>
+            <li>Salin <strong>Nomor Virtual Account</strong> di atas.</li>
+            <li>Buka <strong>Simulator Pembayaran (m-Banking BCA)</strong> di tab terpisah.</li>
+            <li>Periksa detail tagihan Anda dan klik <strong>Bayar Sekarang</strong>.</li>
+            <li>Kembali ke halaman ini, lalu klik <strong>Cek Status Pembayaran</strong>.</li>
           </ol>
         </div>
 
-        <div id="sandbox-action-box" class="sandbox-box">
-          <button id="btn-pay-sandbox" class="btn btn-success btn-block">
-            Pay Now
+        <div id="sandbox-action-box" class="simulator-action-box">
+          <a id="btn-open-simulator" href="sandbox.html" target="_blank" class="btn btn-simulator btn-block">
+            🏦 Buka Simulator Pembayaran (BCA) ↗
+          </a>
+          <button id="btn-check-payment" type="button" class="btn btn-secondary btn-block" style="margin-top: 8px;">
+            🔄 Cek Status Pembayaran
           </button>
         </div>
 
         <div id="payment-success-box" class="success-box hidden">
-          <h4>Payment Confirmed</h4>
-          <p>Your payment has been received and your order is now being processed.</p>
+          <div class="success-icon">🎉</div>
+          <h4>Pembayaran Lunas & Dikonfirmasi!</h4>
+          <p>Terima kasih! Pembayaran Virtual Account Anda telah terverifikasi oleh server. Pesanan kini sedang diproses.</p>
+          <div id="payment-confirmed-time" class="confirmed-time"></div>
         </div>
       </div>
 
